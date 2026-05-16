@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Gaming Playstyle Analyzer</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Noto+Sans+Thai:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg: #03050e;
+      --grid-color: rgba(0,255,180,0.04);
+      --surface: rgba(255,255,255,0.03);
+      --surface2: rgba(255,255,255,0.06);
+      --border: rgba(0,255,180,0.12);
+      --border2: rgba(0,255,180,0.25);
+      --cyan: #00ffb4;
+      --cyan-dim: rgba(0,255,180,0.1);
+      --cyan-glow: rgba(0,255,180,0.3);
+      --magenta: #ff2d78;
+      --magenta-dim: rgba(255,45,120,0.1);
+      --yellow: #ffe24b;
+      --yellow-dim: rgba(255,226,75,0.1);
+      --blue: #4da6ff;
+      --blue-dim: rgba(77,166,255,0.1);
+      --orange: #ff7c2d;
+      --orange-dim: rgba(255,124,45,0.1);
+      --text: #d0f0e8;
+      --muted: #5a7a70;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Noto Sans Thai', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 3rem 1rem;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* Nebula glow top-left */
+    body::before {
+      content: '';
+      position: fixed;
+      top: -20%;
+      left: -10%;
+      width: 60vw;
+      height: 60vw;
+      background: radial-gradient(ellipse, rgba(80,40,160,0.35) 0%, rgba(20,10,60,0.15) 45%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Nebula glow bottom-right */
+    body::after {
+      content: '';
+      position: fixed;
+      bottom: -15%;
+      right: -10%;
+      width: 55vw;
+      height: 55vw;
+      background: radial-gradient(ellipse, rgba(0,180,255,0.2) 0%, rgba(0,60,120,0.1) 45%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    #space-canvas {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 520px;
+    }
+
+    /* ── Header ── */
+    .header {
+      margin-bottom: 2.5rem;
+    }
+
+    .sys-line {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 1.2rem;
+      font-family: 'Orbitron', monospace;
+      font-size: 10px;
+      color: var(--cyan);
+      letter-spacing: 0.15em;
+    }
+
+    .sys-dot { width: 6px; height: 6px; background: var(--cyan); border-radius: 50%; animation: blink 1.4s infinite; }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+
+    h1 {
+      font-family: 'Orbitron', monospace;
+      font-size: clamp(22px, 5vw, 30px);
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: #fff;
+      line-height: 1.1;
+      margin-bottom: 10px;
+    }
+
+    h1 em { color: var(--cyan); font-style: normal; }
+
+    .desc {
+      font-size: 14px;
+      color: var(--muted);
+      font-weight: 300;
+      line-height: 1.6;
+    }
+
+    /* ── Progress ── */
+    .progress-bar {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 1.5rem;
+    }
+
+    .prog-seg {
+      flex: 1;
+      height: 2px;
+      background: var(--surface2);
+      border-radius: 1px;
+      transition: background 0.3s;
+    }
+
+    .prog-seg.done { background: var(--cyan); }
+    .prog-seg.active { background: rgba(0,255,180,0.4); }
+
+    /* ── Question Card ── */
+    .q-card {
+      background: var(--surface);
+      border: 0.5px solid var(--border);
+      border-radius: 2px;
+      padding: 1.5rem;
+      margin-bottom: 10px;
+      position: relative;
+      transition: border-color 0.25s;
+    }
+
+    .q-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 3px; height: 100%;
+      background: var(--border);
+      transition: background 0.25s;
+    }
+
+    .q-card.answered::before { background: var(--cyan); }
+    .q-card.answered { border-color: var(--border2); }
+
+    .q-header {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .q-index {
+      font-family: 'Orbitron', monospace;
+      font-size: 10px;
+      color: var(--cyan);
+      letter-spacing: 0.1em;
+    }
+
+    .q-category {
+      font-size: 11px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .q-text {
+      font-size: 16px;
+      font-weight: 500;
+      color: #fff;
+      line-height: 1.5;
+      margin-bottom: 16px;
+    }
+
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .opt {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      background: transparent;
+      border: 0.5px solid rgba(255,255,255,0.08);
+      border-radius: 2px;
+      color: var(--muted);
+      font-family: 'Noto Sans Thai', sans-serif;
+      font-size: 14px;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.15s;
+      width: 100%;
+    }
+
+    .opt:hover {
+      border-color: var(--border2);
+      color: var(--text);
+      background: var(--cyan-dim);
+    }
+
+    .opt-key {
+      font-family: 'Orbitron', monospace;
+      font-size: 9px;
+      color: inherit;
+      min-width: 18px;
+      opacity: 0.7;
+    }
+
+    .opt.selected {
+      border-color: var(--cyan);
+      color: var(--cyan);
+      background: var(--cyan-dim);
+    }
+
+    .opt.selected .opt-key { opacity: 1; }
+
+    /* ── Analyze Button ── */
+    .btn-wrap { margin-top: 1.5rem; }
+
+    .analyze-btn {
+      width: 100%;
+      padding: 16px;
+      background: transparent;
+      border: 1px solid var(--cyan);
+      border-radius: 2px;
+      color: var(--cyan);
+      font-family: 'Orbitron', monospace;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.2s;
+    }
+
+    .analyze-btn::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--cyan);
+      transform: translateX(-100%);
+      transition: transform 0.25s ease;
+      z-index: 0;
+    }
+
+    .analyze-btn:hover::before { transform: translateX(0); }
+    .analyze-btn:hover { color: var(--bg); }
+    .analyze-btn span { position: relative; z-index: 1; }
+    .analyze-btn:active { transform: scale(0.99); }
+
+    /* ── Error ── */
+    .err {
+      display: none;
+      margin-top: 10px;
+      padding: 10px 16px;
+      border: 0.5px solid rgba(255,45,120,0.4);
+      background: var(--magenta-dim);
+      color: var(--magenta);
+      font-size: 13px;
+      font-family: 'Orbitron', monospace;
+      letter-spacing: 0.05em;
+      border-radius: 2px;
+      text-align: center;
+    }
+
+    /* ── Result ── */
+    .result {
+      display: none;
+      margin-top: 16px;
+      border: 0.5px solid var(--border2);
+      border-radius: 2px;
+      overflow: hidden;
+      animation: fadeUp 0.4s cubic-bezier(0.16,1,0.3,1);
+    }
+
+    @keyframes fadeUp {
+      from { opacity:0; transform: translateY(20px); }
+      to   { opacity:1; transform: translateY(0); }
+    }
+
+    .result-top {
+      padding: 2rem;
+      position: relative;
+      text-align: center;
+    }
+
+    .result-scan {
+      font-family: 'Orbitron', monospace;
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      margin-bottom: 12px;
+      opacity: 0.7;
+    }
+
+    .result-archetype {
+      font-family: 'Orbitron', monospace;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .result-name {
+      font-family: 'Orbitron', monospace;
+      font-size: clamp(20px, 4vw, 26px);
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #fff;
+      margin-bottom: 6px;
+    }
+
+    .result-name em { font-style: normal; }
+
+    .result-tagline {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 20px;
+    }
+
+    .result-body {
+      background: var(--surface);
+      padding: 1.5rem 2rem;
+      border-top: 0.5px solid var(--border);
+    }
+
+    .result-desc {
+      font-size: 14px;
+      color: var(--text);
+      line-height: 1.8;
+      margin-bottom: 1.25rem;
+      font-weight: 300;
+    }
+
+    .section-label {
+      font-family: 'Orbitron', monospace;
+      font-size: 9px;
+      letter-spacing: 0.2em;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    .games-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 1.25rem;
+    }
+
+    .game-chip {
+      font-size: 12px;
+      font-weight: 500;
+      padding: 5px 12px;
+      border-radius: 2px;
+      border: 0.5px solid;
+    }
+
+    .traits-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .trait {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+      color: var(--text);
+    }
+
+    .trait-bar-wrap {
+      flex: 1;
+      height: 2px;
+      background: var(--surface2);
+      border-radius: 1px;
+      overflow: hidden;
+    }
+
+    .trait-bar {
+      height: 100%;
+      border-radius: 1px;
+      transition: width 0.8s cubic-bezier(0.16,1,0.3,1);
+    }
+
+    .trait-label { font-size: 12px; color: var(--muted); min-width: 80px; }
+    .trait-val {
+      font-family: 'Orbitron', monospace;
+      font-size: 10px;
+      min-width: 30px;
+      text-align: right;
+    }
+
+    .retry-btn {
+      width: 100%;
+      padding: 12px;
+      margin-top: 1.25rem;
+      background: transparent;
+      border: 0.5px solid rgba(255,255,255,0.1);
+      border-radius: 2px;
+      color: var(--muted);
+      font-family: 'Orbitron', monospace;
+      font-size: 10px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .retry-btn:hover { color: var(--text); border-color: rgba(255,255,255,0.2); }
+  </style>
+</head>
+<body>
+
+<canvas id="space-canvas"></canvas>
+
+<div class="container">
+
+  <div class="header">
+    <div class="sys-line">
+      <div class="sys-dot"></div>
+      PLAYSTYLE.SYS — UNIVERSAL ANALYZER v2.0
+    </div>
+    <h1>คุณเล่นเกม<br>แบบ<em>ไหน</em>?</h1>
+    <p class="desc">วิเคราะห์สไตล์การเล่นของคุณในทุกประเภทเกม ไม่ว่าจะเป็น FPS, RPG, Strategy หรือ MOBA</p>
+  </div>
+
+  <div class="progress-bar" id="progbar">
+    <div class="prog-seg active" id="ps0"></div>
+    <div class="prog-seg" id="ps1"></div>
+    <div class="prog-seg" id="ps2"></div>
+    <div class="prog-seg" id="ps3"></div>
+    <div class="prog-seg" id="ps4"></div>
+    <div class="prog-seg" id="ps5"></div>
+  </div>
+
+  <!-- Q1 -->
+  <div class="q-card" id="c0">
+    <div class="q-header">
+      <span class="q-index">01 / 06</span>
+      <span class="q-category">Combat Style</span>
+    </div>
+    <p class="q-text">เวลาเจอศัตรูในเกม คุณมักจะทำอะไร?</p>
+    <div class="options">
+      <button class="opt" onclick="pick(0,'A',this)"><span class="opt-key">A</span>บุกเข้าหาทันที ไม่รอ</button>
+      <button class="opt" onclick="pick(0,'B',this)"><span class="opt-key">B</span>หาที่กำบัง วางแผนก่อนโจมตี</button>
+      <button class="opt" onclick="pick(0,'C',this)"><span class="opt-key">C</span>ดูสถานการณ์และตัดสินใจตามที่เห็น</button>
+      <button class="opt" onclick="pick(0,'D',this)"><span class="opt-key">D</span>หลบและรอจังหวะที่ดีที่สุด</button>
+    </div>
+  </div>
+
+  <!-- Q2 -->
+  <div class="q-card" id="c1">
+    <div class="q-header">
+      <span class="q-index">02 / 06</span>
+      <span class="q-category">Team Role</span>
+    </div>
+    <p class="q-text">ในเกมทีม คุณชอบทำหน้าที่อะไรมากที่สุด?</p>
+    <div class="options">
+      <button class="opt" onclick="pick(1,'A',this)"><span class="opt-key">A</span>นำหน้า ตัดสินใจ สั่งการทีม</button>
+      <button class="opt" onclick="pick(1,'B',this)"><span class="opt-key">B</span>ซัพพอร์ตเพื่อน ดูแลทีมให้แข็งแกร่ง</button>
+      <button class="opt" onclick="pick(1,'C',this)"><span class="opt-key">C</span>ดีลเดจ สร้างความเสียหายสูงสุด</button>
+      <button class="opt" onclick="pick(1,'D',this)"><span class="opt-key">D</span>ลาดตระเวน เก็บข้อมูล แจ้งเพื่อนทีม</button>
+    </div>
+  </div>
+
+  <!-- Q3 -->
+  <div class="q-card" id="c2">
+    <div class="q-header">
+      <span class="q-index">03 / 06</span>
+      <span class="q-category">Decision Making</span>
+    </div>
+    <p class="q-text">เวลาต้องตัดสินใจในเกม คุณเลือกแบบไหน?</p>
+    <div class="options">
+      <button class="opt" onclick="pick(2,'A',this)"><span class="opt-key">A</span>คิดเร็ว ทำเร็ว เชื่อ Instinct</button>
+      <button class="opt" onclick="pick(2,'B',this)"><span class="opt-key">B</span>วิเคราะห์ข้อมูลก่อนเสมอ</button>
+      <button class="opt" onclick="pick(2,'C',this)"><span class="opt-key">C</span>ลองผิดลองถูกจนเจอทางที่ดีที่สุด</button>
+      <button class="opt" onclick="pick(2,'D',this)"><span class="opt-key">D</span>ดูว่าเพื่อนทำอะไร แล้วเสริม</button>
+    </div>
+  </div>
+
+  <!-- Q4 -->
+  <div class="q-card" id="c3">
+    <div class="q-header">
+      <span class="q-index">04 / 06</span>
+      <span class="q-category">Resource Management</span>
+    </div>
+    <p class="q-text">เวลาได้รับทรัพยากรในเกม (ของ, เงิน, แต้ม) คุณทำอะไร?</p>
+    <div class="options">
+      <button class="opt" onclick="pick(3,'A',this)"><span class="opt-key">A</span>ใช้ทันที อย่ากักตุน</button>
+      <button class="opt" onclick="pick(3,'B',this)"><span class="opt-key">B</span>เก็บสะสมเพื่ออัพเกรดสิ่งสำคัญ</button>
+      <button class="opt" onclick="pick(3,'C',this)"><span class="opt-key">C</span>แบ่งให้ทีม ช่วยทุกคนให้แข็งแกร่ง</button>
+      <button class="opt" onclick="pick(3,'D',this)"><span class="opt-key">D</span>ลงทุนกับอุปกรณ์ที่เพิ่ม Control</button>
+    </div>
+  </div>
+
+  <!-- Q5 -->
+  <div class="q-card" id="c4">
+    <div class="q-header">
+      <span class="q-index">05 / 06</span>
+      <span class="q-category">Loss Response</span>
+    </div>
+    <p class="q-text">เมื่อแพ้หรือทำพลาด คุณรู้สึกและทำอะไร?</p>
+    <div class="options">
+      <button class="opt" onclick="pick(4,'A',this)"><span class="opt-key">A</span>มันส์ขึ้น อยากแก้แค้น rematch ทันที</button>
+      <button class="opt" onclick="pick(4,'B',this)"><span class="opt-key">B</span>หยุดคิดว่าทำพลาดตรงไหน</button>
+      <button class="opt" onclick="pick(4,'C',this)"><span class="opt-key">C</span>ไม่ซีเรียส เล่นต่อไปสนุกๆ</button>
+      <button class="opt" onclick="pick(4,'D',this)"><span class="opt-key">D</span>ดู replay หรือหาข้อมูลเพิ่ม</button>
+    </div>
+  </div>
+
+  <!-- Q6 -->
+  <div class="q-card" id="c5">
+    <div class="q-header">
+      <span class="q-index">06 / 06</span>
+      <span class="q-category">Game Genre</span>
+    </div>
+    <p class="q-text">ประเภทเกมที่คุณชอบเล่นมากที่สุดคือ?</p>
+    <div class="options">
+      <button class="opt" onclick="pick(5,'A',this)"><span class="opt-key">A</span>FPS / Battle Royale — ยิงปืน แข่งขัน</button>
+      <button class="opt" onclick="pick(5,'B',this)"><span class="opt-key">B</span>RPG / Open World — เนื้อเรื่อง สำรวจ</button>
+      <button class="opt" onclick="pick(5,'C',this)"><span class="opt-key">C</span>MOBA / Strategy — ทีม วางแผน</button>
+      <button class="opt" onclick="pick(5,'D',this)"><span class="opt-key">D</span>ชอบหมด เล่นได้ทุกอย่าง</button>
+    </div>
+  </div>
+
+  <div class="btn-wrap">
+    <button class="analyze-btn" onclick="analyze()"><span>▶ ANALYZE PLAYSTYLE</span></button>
+    <div class="err" id="err">[ ERROR ] กรุณาตอบให้ครบทุกข้อ</div>
+  </div>
+
+  <div class="result" id="result">
+    <div class="result-top" id="rtop">
+      <div class="result-scan" id="r-scan">SCANNING COMPLETE</div>
+      <div class="result-archetype" id="r-arch"></div>
+      <div class="result-name" id="r-name"></div>
+      <div class="result-tagline" id="r-tag"></div>
+    </div>
+    <div class="result-body">
+      <p class="result-desc" id="r-desc"></p>
+      <div class="section-label">เกมที่เหมาะกับคุณ</div>
+      <div class="games-grid" id="r-games"></div>
+      <div class="section-label" style="margin-top:1rem">Stat Profile</div>
+      <div class="traits-list" id="r-traits"></div>
+      <button class="retry-btn" onclick="reset()">↺ ทำแบบทดสอบอีกครั้ง</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const ans = new Array(6).fill(null);
+
+  function pick(qi, val, el) {
+    ans[qi] = val;
+    const card = document.getElementById('c' + qi);
+    card.querySelectorAll('.opt').forEach(b => b.classList.remove('selected'));
+    el.classList.add('selected');
+    card.classList.add('answered');
+    updateProgress();
+  }
+
+  function updateProgress() {
+    for (let i = 0; i < 6; i++) {
+      const seg = document.getElementById('ps' + i);
+      if (ans[i]) {
+        seg.classList.add('done');
+        seg.classList.remove('active');
+      } else {
+        seg.classList.remove('done');
+        const prev = i === 0 || ans[i-1];
+        seg.className = 'prog-seg' + (prev ? ' active' : '');
+      }
+    }
+  }
+
+  const profiles = {
+    BERSERKER: {
+      arch: 'ARCHETYPE — BERSERKER',
+      name: 'THE <em>BERSERKER</em>',
+      tag: 'ไม่มีเวลาคิด มีแต่เวลาบุก',
+      color: '#ff2d78',
+      bg: 'rgba(255,45,120,0.05)',
+      desc: 'คุณเล่นด้วยสัญชาตญาณล้วนๆ ไม่มีเวลาให้ศัตรูหายใจ บุกก่อนคิดทีหลัง ความมั่นใจและความเร็วคือสิ่งที่ทำให้คุณอันตราย คนประเภทนี้มักจะ carry ทีมได้ในช่วง clutch ที่สุด แต่ก็เสี่ยงพลาดได้บ่อยเช่นกัน',
+      games: ['Valorant — Jett', 'Apex Legends', 'DMC5', 'Sekiro', 'Warzone', 'Hades'],
+      gameColor: '#ff2d78',
+      traits: [
+        { label: 'Aggression', val: 95 },
+        { label: 'Speed', val: 90 },
+        { label: 'Patience', val: 20 },
+        { label: 'Strategy', val: 35 },
+        { label: 'Teamwork', val: 50 },
+      ]
+    },
+    MASTERMIND: {
+      arch: 'ARCHETYPE — MASTERMIND',
+      name: 'THE <em>MASTERMIND</em>',
+      tag: 'ชนะก่อนเกมเริ่ม',
+      color: '#4da6ff',
+      bg: 'rgba(77,166,255,0.05)',
+      desc: 'คุณคือสมอง ทุกการเคลื่อนไหวถูกคำนวณมาแล้ว คุณมองเห็นสิ่งที่คนอื่นมองไม่เห็นและวางแผนหลายขั้นตอนล่วงหน้า ความอดทนและการวิเคราะห์คือจุดแข็ง ศัตรูมักไม่รู้ว่าตกกับดักคุณเมื่อไหร่',
+      games: ['DOTA 2', 'Civilization VI', 'XCOM 2', 'Total War', 'StarCraft II', 'Baldur\'s Gate 3'],
+      gameColor: '#4da6ff',
+      traits: [
+        { label: 'Aggression', val: 30 },
+        { label: 'Speed', val: 45 },
+        { label: 'Patience', val: 95 },
+        { label: 'Strategy', val: 98 },
+        { label: 'Teamwork', val: 65 },
+      ]
+    },
+    GUARDIAN: {
+      arch: 'ARCHETYPE — GUARDIAN',
+      name: 'THE <em>GUARDIAN</em>',
+      tag: 'ทีมไม่แพ้ถ้าฉันยังอยู่',
+      color: '#00ffb4',
+      bg: 'rgba(0,255,180,0.05)',
+      desc: 'คุณมีค่าสูงสุดเมื่ออยู่กับทีม ไม่ใช่ตัวเลข kill แต่คุณทำให้คนรอบข้างเก่งขึ้น ซัพพอร์ต ฮีล บัฟ หรือแค่สื่อสารได้ดี คนที่เล่นกับคุณจะรู้สึกปลอดภัยและมีกำลังใจ',
+      games: ['Overwatch 2 — Ana/Lucio', 'Final Fantasy XIV', 'WoW', 'Paladins', 'League — Support', 'Deep Rock Galactic'],
+      gameColor: '#00ffb4',
+      traits: [
+        { label: 'Aggression', val: 40 },
+        { label: 'Speed', val: 55 },
+        { label: 'Patience', val: 80 },
+        { label: 'Strategy', val: 70 },
+        { label: 'Teamwork', val: 99 },
+      ]
+    },
+    GHOST: {
+      arch: 'ARCHETYPE — GHOST',
+      name: 'THE <em>GHOST</em>',
+      tag: 'เห็นทุกอย่าง ไม่ถูกเห็น',
+      color: '#ffe24b',
+      bg: 'rgba(255,226,75,0.05)',
+      desc: 'คุณไม่ชอบการเผชิญหน้าตรงๆ แต่รู้ข้อมูลมากกว่าใคร เก่งเรื่องการลาดตระเวน ซุ่มโจมตี และหลบเลี่ยง ศัตรูมักไม่รู้ว่าคุณอยู่ที่ไหนจนกระทั่งสายเกินไป',
+      games: ['Hunt: Showdown', 'Escape from Tarkov', 'Splinter Cell', 'Death Stranding', 'Subnautica', 'Outer Wilds'],
+      gameColor: '#ffe24b',
+      traits: [
+        { label: 'Aggression', val: 45 },
+        { label: 'Speed', val: 60 },
+        { label: 'Patience', val: 88 },
+        { label: 'Strategy', val: 80 },
+        { label: 'Teamwork', val: 55 },
+      ]
+    },
+    EXPLORER: {
+      arch: 'ARCHETYPE — EXPLORER',
+      name: 'THE <em>EXPLORER</em>',
+      tag: 'ชีวิตคือการสำรวจ',
+      color: '#ff7c2d',
+      bg: 'rgba(255,124,45,0.05)',
+      desc: 'คุณเล่นเกมเพื่อประสบการณ์ ไม่ใช่แค่ชัยชนะ ชอบสำรวจทุกมุม ลองทุกอย่าง อ่านทุก Lore และหาความสนุกแบบที่คนอื่นไม่เจอ เกมที่ดีสำหรับคุณคือเกมที่ทำให้คุณรู้สึกว่าโลกมันกว้างขึ้น',
+      games: ['Elden Ring', 'The Witcher 3', 'No Man\'s Sky', 'Minecraft', 'RDR2', 'BotW / TotK'],
+      gameColor: '#ff7c2d',
+      traits: [
+        { label: 'Aggression', val: 35 },
+        { label: 'Speed', val: 30 },
+        { label: 'Patience', val: 85 },
+        { label: 'Strategy', val: 60 },
+        { label: 'Teamwork', val: 45 },
+      ]
+    },
+  };
+
+  function getProfile(a) {
+    const score = { B:0, M:0, G:0, Ghost:0, E:0 };
+
+    // Q1 combat
+    if (a[0]==='A') score.B+=3;
+    else if (a[0]==='B') score.M+=2;
+    else if (a[0]==='C') score.G+=1;
+    else score.Ghost+=3;
+
+    // Q2 role
+    if (a[1]==='A') score.M+=2;
+    else if (a[1]==='B') score.G+=3;
+    else if (a[1]==='C') score.B+=2;
+    else score.Ghost+=2;
+
+    // Q3 decision
+    if (a[2]==='A') score.B+=3;
+    else if (a[2]==='B') score.M+=3;
+    else if (a[2]==='C') score.E+=2;
+    else score.G+=2;
+
+    // Q4 resource
+    if (a[3]==='A') score.B+=2;
+    else if (a[3]==='B') score.M+=2;
+    else if (a[3]==='C') score.G+=3;
+    else score.Ghost+=2;
+
+    // Q5 loss
+    if (a[4]==='A') score.B+=3;
+    else if (a[4]==='B') score.M+=3;
+    else if (a[4]==='C') score.E+=3;
+    else score.Ghost+=2;
+
+    // Q6 genre
+    if (a[5]==='A') score.B+=2;
+    else if (a[5]==='B') score.E+=3;
+    else if (a[5]==='C') { score.M+=2; score.G+=1; }
+    else { score.E+=1; score.G+=1; }
+
+    const map = { B:'BERSERKER', M:'MASTERMIND', G:'GUARDIAN', Ghost:'GHOST', E:'EXPLORER' };
+    const top = Object.entries(score).sort((x,y)=>y[1]-x[1])[0][0];
+    return profiles[map[top]];
+  }
+
+  function analyze() {
+    if (ans.some(a=>a===null)) {
+      document.getElementById('err').style.display = 'block';
+      return;
+    }
+    document.getElementById('err').style.display = 'none';
+
+    const p = getProfile(ans);
+    const rtop = document.getElementById('rtop');
+    rtop.style.background = p.bg;
+    rtop.style.borderBottom = '0.5px solid ' + p.color + '30';
+
+    document.getElementById('r-arch').textContent = p.arch;
+    document.getElementById('r-arch').style.color = p.color;
+    document.getElementById('r-name').innerHTML = p.name;
+    document.getElementById('r-name').querySelector('em').style.color = p.color;
+    document.getElementById('r-tag').textContent = p.tag;
+
+    document.getElementById('r-desc').textContent = p.desc;
+
+    const gGrid = document.getElementById('r-games');
+    gGrid.innerHTML = p.games.map(g =>
+      `<span class="game-chip" style="color:${p.gameColor};border-color:${p.gameColor}40;background:${p.gameColor}12">${g}</span>`
+    ).join('');
+
+    const tList = document.getElementById('r-traits');
+    tList.innerHTML = p.traits.map(t => `
+      <div class="trait">
+        <span class="trait-label">${t.label}</span>
+        <div class="trait-bar-wrap">
+          <div class="trait-bar" style="width:${t.val}%;background:${p.color}"></div>
+        </div>
+        <span class="trait-val" style="color:${p.color}">${t.val}</span>
+      </div>
+    `).join('');
+
+    const res = document.getElementById('result');
+    res.style.borderColor = p.color + '40';
+    res.style.display = 'block';
+    res.style.animation = 'none';
+    void res.offsetWidth;
+    res.style.animation = 'fadeUp 0.4s cubic-bezier(0.16,1,0.3,1)';
+    res.scrollIntoView({ behavior:'smooth', block:'start' });
+  }
+
+  function reset() {
+    ans.fill(null);
+    document.querySelectorAll('.opt').forEach(b => b.classList.remove('selected'));
+    document.querySelectorAll('.q-card').forEach(c => c.classList.remove('answered'));
+    document.getElementById('result').style.display = 'none';
+    document.getElementById('err').style.display = 'none';
+    updateProgress();
+    window.scrollTo({ top:0, behavior:'smooth' });
+  }
+
+  updateProgress();
+</script>
+
+<script>
+  (function() {
+    const canvas = document.getElementById('space-canvas');
+    const ctx = canvas.getContext('2d');
+    let W, H, stars, shootingStars;
+
+    function resize() {
+      W = canvas.width = window.innerWidth;
+      H = canvas.height = window.innerHeight;
+    }
+
+    function initStars() {
+      stars = Array.from({ length: 280 }, () => ({
+        x: Math.random() * W,
+        y: Math.random() * H,
+        r: Math.random() * 1.4 + 0.2,
+        alpha: Math.random() * 0.7 + 0.2,
+        speed: Math.random() * 0.004 + 0.002,
+        phase: Math.random() * Math.PI * 2,
+        color: pickStarColor(),
+      }));
+      shootingStars = [];
+    }
+
+    function pickStarColor() {
+      const palette = ['#ffffff','#c8d8ff','#ffd8c8','#d8c8ff','#c8fff0'];
+      return palette[Math.floor(Math.random() * palette.length)];
+    }
+
+    function spawnShooting() {
+      if (shootingStars.length < 2 && Math.random() < 0.008) {
+        const angle = Math.PI / 6 + Math.random() * Math.PI / 6;
+        shootingStars.push({
+          x: Math.random() * W * 0.7,
+          y: Math.random() * H * 0.4,
+          len: 90 + Math.random() * 80,
+          speed: 7 + Math.random() * 5,
+          alpha: 1,
+          angle,
+          dx: Math.cos(angle),
+          dy: Math.sin(angle),
+        });
+      }
+    }
+
+    let t = 0;
+    function draw() {
+      ctx.clearRect(0, 0, W, H);
+      t += 0.016;
+
+      // Stars
+      for (const s of stars) {
+        const a = s.alpha * (0.6 + 0.4 * Math.sin(t * s.speed * 60 + s.phase));
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+        ctx.fillStyle = s.color;
+        ctx.globalAlpha = a;
+        ctx.fill();
+      }
+
+      // Shooting stars
+      spawnShooting();
+      for (let i = shootingStars.length - 1; i >= 0; i--) {
+        const ss = shootingStars[i];
+        const grad = ctx.createLinearGradient(ss.x, ss.y, ss.x - ss.dx * ss.len, ss.y - ss.dy * ss.len);
+        grad.addColorStop(0, `rgba(255,255,255,${ss.alpha})`);
+        grad.addColorStop(1, 'rgba(255,255,255,0)');
+        ctx.beginPath();
+        ctx.moveTo(ss.x, ss.y);
+        ctx.lineTo(ss.x - ss.dx * ss.len, ss.y - ss.dy * ss.len);
+        ctx.strokeStyle = grad;
+        ctx.lineWidth = 1.5;
+        ctx.globalAlpha = ss.alpha;
+        ctx.stroke();
+        ss.x += ss.dx * ss.speed;
+        ss.y += ss.dy * ss.speed;
+        ss.alpha -= 0.018;
+        if (ss.alpha <= 0) shootingStars.splice(i, 1);
+      }
+
+      ctx.globalAlpha = 1;
+      requestAnimationFrame(draw);
+    }
+
+    window.addEventListener('resize', () => { resize(); initStars(); });
+    resize();
+    initStars();
+    draw();
+  })();
+</script>
+</body>
+</html>
