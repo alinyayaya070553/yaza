@@ -7,12 +7,12 @@
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Noto+Sans+Thai:wght@300;400;500&display=swap" rel="stylesheet"/>
   <style>
     :root {
-      --bg: #05070f;
-      --grid-color: rgba(0,255,180,0.04);
+      --bg: #030b2b;
+      --grid-color: rgba(60, 156, 57, 0.116);
       --surface: rgba(255,255,255,0.03);
-      --surface2: rgba(255,255,255,0.06);
+      --surface2: rgba(245, 236, 236, 0.06);
       --border: rgba(0,255,180,0.12);
-      --border2: rgba(0,255,180,0.25);
+      --border2: rgba(0, 255, 179, 0.363);
       --cyan: #00ffb4;
       --cyan-dim: rgba(0,255,180,0.1);
       --cyan-glow: rgba(0,255,180,0.3);
@@ -25,7 +25,7 @@
       --orange: #ff7c2d;
       --orange-dim: rgba(255,124,45,0.1);
       --text: #d0f0e8;
-      --muted: #5a7a70;
+      --muted: #83a79b;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -440,7 +440,7 @@
       PLAYSTYLE.SYS — UNIVERSAL ANALYZER v2.0
     </div>
     <h1>คุณเล่นเกม<br>แบบ<em>ไหน</em>?</h1>
-    <p class="desc">วิเคราะห์สไตล์การเล่นของคุณในทุกประเภทเกม ไม่ว่าจะเป็น FPS, RPG, Strategy หรือ MOBA</p>
+    <p class="desc">วิเคราะห์สไตล์การเล่นของทุกคนในทุกประเภทเกม ไม่ว่าจะเป็น FPS, RPG, Strategy หรือ MOBA</p>
   </div>
 
   <div class="progress-bar" id="progbar">
@@ -596,10 +596,10 @@
     BERSERKER: {
       arch: 'ARCHETYPE — BERSERKER',
       name: 'THE <em>BERSERKER</em>',
-      tag: 'ไม่มีเวลาคิด มีแต่เวลาบุก',
+      tag: 'คิดทีหลังบวกไว้ก่อน',
       color: '#ff2d78',
       bg: 'rgba(255,45,120,0.05)',
-      desc: 'คุณเล่นด้วยสัญชาตญาณล้วนๆ ไม่มีเวลาให้ศัตรูหายใจ บุกก่อนคิดทีหลัง ความมั่นใจและความเร็วคือสิ่งที่ทำให้คุณอันตราย คนประเภทนี้มักจะ carry ทีมได้ในช่วง clutch ที่สุด แต่ก็เสี่ยงพลาดได้บ่อยเช่นกัน',
+      desc: 'สไตล์นี้คือ การเล่นเชิงรุก (Aggressive Playstyle)เน้นการเข้าปะทะอย่างรวดเร็ว ตัดสินใจไว และกดดันคู่ต่อสู้ต่อเนื่องให้ความสำคัญกับจังหวะเกมมากกว่าการคิดระยะยาว สายบวกไวไม่รีรอ',
       games: ['Valorant', 'Apex Legends', 'DMC5', 'Sekiro', 'Warzone', 'Hades','PUBG Mobile', 'Call of Duty Mobile' ,'free fire'],
       gameColor: '#ff2d78',
       traits: [
@@ -616,8 +616,8 @@
       tag: 'ชนะก่อนเกมเริ่ม',
       color: '#4da6ff',
       bg: 'rgba(77,166,255,0.05)',
-      desc: 'คุณคือสมอง ทุกการเคลื่อนไหวถูกคำนวณมาแล้ว คุณมองเห็นสิ่งที่คนอื่นมองไม่เห็นและวางแผนหลายขั้นตอนล่วงหน้า ความอดทนและการวิเคราะห์คือจุดแข็ง ศัตรูมักไม่รู้ว่าตกกับดักคุณเมื่อไหร่',
-      games: ['DOTA 2', 'Civilization VI', 'XCOM 2', 'Total War', 'StarCraft II', 'Baldur\'s Gate 3','Clash Royale ,'],
+      desc: 'สไตล์นี้คือ การเล่นเชิงกลยุทธ์ (Strategic Playstyle) ชอบวางแผนและคิดล่วงหน้า วิเคราะห์สถานการณ์และปรับตัวได้ดี มีความอดทนสูง ไม่รีบร้อน แต่พร้อมจะโจมตีเมื่อเห็นโอกาส สายวางแผน',
+      games: ['DOTA 2', 'Civilization VI', 'XCOM 2', 'Total War', 'StarCraft II', 'Baldur\'s Gate 3','Clash Royale ,','Mobile Legends', 'RoV'],
       gameColor: '#4da6ff',
       traits: [
         { label: 'Aggression', val: 30 },
@@ -630,11 +630,11 @@
     GUARDIAN: {
       arch: 'ARCHETYPE — GUARDIAN',
       name: 'THE <em>GUARDIAN</em>',
-      tag: 'ทีมไม่แพ้ถ้าฉันยังอยู่',
+      tag: 'ไม่แพ้ถ้าฉันยังอยู่',
       color: '#00ffb4',
       bg: 'rgba(0,255,180,0.05)',
-      desc: 'คุณมีค่าสูงสุดเมื่ออยู่กับทีม ไม่ใช่ตัวเลข kill แต่คุณทำให้คนรอบข้างเก่งขึ้น ซัพพอร์ต ฮีล บัฟ หรือแค่สื่อสารได้ดี คนที่เล่นกับคุณจะรู้สึกปลอดภัยและมีกำลังใจ',
-      games: ['Overwatch 2', 'Final Fantasy XIV', 'WoW', 'Paladins', 'League — Support', 'Deep Rock Galactic', 'Valorant'],
+      desc: 'สไตล์นี้คือ การเล่นเชิงซัพพอร์ต (Support Playstyle) คุณมีค่าสูงสุดเมื่ออยู่กับทีม ไม่ใช่ตัวเลข kill แต่คุณทำให้คนรอบข้างเก่งขึ้น ซัพพอร์ต ฮีล บัฟ สายซัพพอร์ตที่ดี',
+      games: ['Overwatch 2', 'Final Fantasy XIV', 'WoW', 'Paladins', 'League — Support', 'Deep Rock Galactic', 'Valorant','Mobile Legends', 'RoV', 'Wild Rift'],
       gameColor: '#00ffb4',
       traits: [
         { label: 'Aggression', val: 40 },
@@ -647,11 +647,11 @@
     GHOST: {
       arch: 'ARCHETYPE — GHOST',
       name: 'THE <em>GHOST</em>',
-      tag: 'เห็นทุกอย่าง ไม่ถูกเห็น',
+      tag: 'เห็นหมดแต่ไม่ได้พูด',
       color: '#ffe24b',
       bg: 'rgba(255,226,75,0.05)',
-      desc: 'คุณไม่ชอบการเผชิญหน้าตรงๆ แต่รู้ข้อมูลมากกว่าใคร เก่งเรื่องการลาดตระเวน ซุ่มโจมตี และหลบเลี่ยง ศัตรูมักไม่รู้ว่าคุณอยู่ที่ไหนจนกระทั่งสายเกินไป',
-      games: ['Hunt: Showdown', 'Escape from Tarkov', 'Splinter Cell', 'Death Stranding', 'Subnautica', 'Outer Wilds'],
+      desc: 'สไตล์นี้คือ การเล่นเชิงซุ่ม (Stealth Playstyle) คุณไม่ชอบการเผชิญหน้าตรงๆ แต่รู้ข้อมูลมากกว่าใคร เก่งเรื่องการลาดตระเวน ซุ่มโจมตี และหลบเลี่ยง สายซุ่มเงียบ',
+      games: ['Hunt: Showdown', 'Escape from Tarkov', 'Splinter Cell', 'Death Stranding', 'Subnautica', 'Outer Wilds','clash royale' ],
       gameColor: '#ffe24b',
       traits: [
         { label: 'Aggression', val: 45 },
@@ -667,8 +667,8 @@
       tag: 'ชีวิตคือการสำรวจ',
       color: '#ff7c2d',
       bg: 'rgba(255,124,45,0.05)',
-      desc: 'คุณเล่นเกมเพื่อประสบการณ์ ไม่ใช่แค่ชัยชนะ ชอบสำรวจทุกมุม ลองทุกอย่าง อ่านทุก Lore และหาความสนุกแบบที่คนอื่นไม่เจอ เกมที่ดีสำหรับคุณคือเกมที่ทำให้คุณรู้สึกว่าโลกมันกว้างขึ้น',
-      games: ['Elden Ring', 'The Witcher 3', 'No Man\'s Sky', 'Minecraft', 'RDR2', 'BotW / TotK'],
+      desc: 'สไตล์นี้คือ การเล่นเชิงสำรวจ (Exploration Playstyle) คุณเล่นเกมเพื่อประสบการณ์ ไม่ใช่แค่ชัยชนะ ชอบสำรวจทุกมุม ลองทุกอย่าง เล่นได้ที่ลองได้ทุกแบบ สายสำรวจที่แท้จริง',
+      games: ['Elden Ring', 'The Witcher 3', 'No Man\'s Sky', 'Minecraft', 'RDR2', 'BotW / TotK','Genshin Impact', 'ARK: Survival Evolved', 'Terraria', 'Roblox'],
       gameColor: '#ff7c2d',
       traits: [
         { label: 'Aggression', val: 35 },
